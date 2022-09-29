@@ -1,6 +1,6 @@
 [package]
 name = "image_to_pdf"
-version = "0.2.4"
+version = "0.3.0"
 edition = "2021"
 description = "Create PDFs from images"
 readme = "README.md"
