@@ -1,4 +1,4 @@
-A crate for creating PDFs from JPEG images.
+A crate for creating PDFs from images.
 
 ## License
 
