@@ -1,64 +1,22 @@
-use std::fs::{self, File};
-use std::io::{self, prelude::*, BufWriter};
-use std::path::PathBuf;
-use std::process;
+use std::{fs::File, io::BufWriter};
 
-use jpeg_to_pdf::JpegToPdf;
-use structopt::StructOpt;
+use image_to_pdf::ImageToPdf;
+use printpdf::image::{DynamicImage, self};
 
-#[derive(Debug, StructOpt)]
-struct Opt {
-    /// By default, uses the same name as the first input, with the extension changed to ".pdf"
-    #[structopt(short, long, parse(from_os_str))]
-    output: Option<PathBuf>,
+fn main() {
+    let out_file = File::create("out.pdf").unwrap();
 
-    #[structopt(parse(from_os_str))]
-    images: Vec<PathBuf>,
-
-    #[structopt(long, default_value = "300")]
-    dpi: f64,
-
-    /// Strip EXIF metadata from the embedded images
-    #[structopt(long)]
-    strip_exif: bool,
-
-    /// Add a title to the generated PDF
-    #[structopt(long)]
-    title: Option<String>,
+    ImageToPdf::new()
+        .add_image(get_img("https://scans-manhwa.lowee.us/manga/Eleceed/0213-001.png").unwrap())
+        .add_image(get_img("https://scans-manhwa.lowee.us/manga/Eleceed/0186-002.png").unwrap())
+        .add_image(get_img("https://wallpapercave.com/wp/bfwAi41.jpg").unwrap())
+        .create_pdf(&mut BufWriter::new(out_file))
+        .unwrap();
 }
 
-fn main() -> io::Result<()> {
-    let opt = Opt::from_args();
-
-    if opt.images.is_empty() {
-        eprintln!("At least one image must be provided");
-        process::exit(-1);
-    }
-
-    let out_file = File::create(match opt.output {
-        Some(p) => p,
-        None => {
-            let mut out = opt.images[0].clone();
-            out.set_extension("pdf");
-            out
-        }
-    })?;
-
-    let mut job = JpegToPdf::new();
-    for image in opt.images {
-        // have to do this with a for loop instead of job.add_images() to use the ? error-handling operator
-        job = job.add_image(fs::read(image)?);
-    }
-    job = job
-        .set_dpi(opt.dpi)
-        .strip_exif(opt.strip_exif)
-        .set_document_title(opt.title.unwrap_or_else(String::new));
-
-    let mut out = BufWriter::new(out_file);
-    if let Err(e) = job.create_pdf(&mut out) {
-        eprintln!("{}", e);
-        process::exit(-1);
-    }
-    out.flush()?;
-    Ok(())
+pub fn get_img(url: &str) -> Result<DynamicImage, reqwest::Error> {
+    Ok(
+        image::load_from_memory(&reqwest::blocking::get(url)?.bytes()?)
+            .expect("Failed to load image"),
+    )
 }

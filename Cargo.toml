@@ -1,18 +1,12 @@
 [package]
-name = "jpeg-to-pdf"
-version = "0.2.3"
-authors = ["Kai Page <kai@quantaly.net>"]
-edition = "2018"
-description = "Create PDFs from JPEG images"
+name = "image_to_pdf"
+version = "0.2.4"
+edition = "2021"
+description = "Create PDFs from images"
 readme = "README.md"
-repository = "https://github.com/Quantaly/jpeg-to-pdf"
 license = "MIT OR Apache-2.0"
-keywords = ["jpeg", "jpg", "pdf"]
-categories = ["multimedia::images", "command-line-utilities"]
-
-[[bin]]
-name = "jpeg-to-pdf"
-path = "src/bin/cli.rs"
+keywords = ["image", "pdf"]
+categories = ["multimedia::images"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -20,7 +14,8 @@ path = "src/bin/cli.rs"
 img-parts = "0.2"
 jpeg-decoder = "0.1"
 kamadak-exif = "0.5"
-printpdf = "0.3"
+printpdf = { version = "0.3", features = ["embedded_images"] }
+reqwest = { version = "0.11.12", features = ["blocking"] }
 structopt = "0.3"
 
 [dev-dependencies]
