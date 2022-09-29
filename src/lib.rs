@@ -4,8 +4,6 @@ pub use errors::*;
 use printpdf::{*, image::{DynamicImage, GenericImageView}};
 use std::{io::{prelude::*, BufWriter}, convert::TryInto};
 
-
-
 pub struct ImageToPdf {
     images: Vec<DynamicImage>,
     dpi: f64,
