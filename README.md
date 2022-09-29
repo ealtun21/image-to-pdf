@@ -1,5 +1,14 @@
 A crate for creating PDFs from images.
 
+## Note
+
+* Tests are currently not written (TODO)
+* Code is mostly untested (TODO)
+* Everything might change I'm writting this for my own project. Which is being written to learn rust.
+
+## Use at your own risk! 
+* (Don't use it :D)
+
 ## License
 
 Licensed under either of
