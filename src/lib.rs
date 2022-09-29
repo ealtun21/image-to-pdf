@@ -33,8 +33,7 @@ impl ImageToPdf {
     /// Add one or more images to the PDF output in parallel.
     pub fn add_images_par(
         mut self,
-        images: impl IntoIterator<Item = DynamicImage>
-            + rayon::iter::ParallelIterator<Item = DynamicImage>,
+        images: impl rayon::iter::ParallelIterator<Item = DynamicImage>,
     ) -> ImageToPdf {
         self.images.par_extend(images);
         self
