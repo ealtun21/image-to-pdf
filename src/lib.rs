@@ -1,7 +1,5 @@
-use errors::Error;
-pub use errors::*;
+use printpdf::{image_crate::{DynamicImage, GenericImageView}, PdfDocument, PdfDocumentReference, Px, Image, ImageTransform, Error};
 
-use printpdf::{*, image::{DynamicImage, GenericImageView}};
 use std::{io::{prelude::*, BufWriter}, convert::TryInto};
 
 pub struct ImageToPdf {
@@ -46,12 +44,10 @@ impl ImageToPdf {
     /// Writes the PDF output to `out`.
     pub fn create_pdf(self, out: &mut BufWriter<impl Write>) -> Result<(), Error> {
         let dpi= self.dpi;
-
         let doc = PdfDocument::empty(self.document_title);
         for image in self.images.into_iter() {
             add_page(image, &doc, dpi);
         }
-
         doc.save(out)
     }
 }
@@ -71,14 +67,7 @@ fn add_page(
     );
 
     let image = Image::from_dynamic_image(&image);
-   
-    image.add_to_layer(
-        doc.get_page(page).get_layer(layer),
-        None,
-        None,
-        None,
-        None,
-        None,
-        Some(dpi),
-    );
+    let current_layer = doc.get_page(page).get_layer(layer);
+
+    image.add_to_layer(current_layer.clone(), ImageTransform::default());
 }
