@@ -2,7 +2,7 @@ use printpdf::{
     image_crate::{DynamicImage, GenericImageView},
     Error, Image, ImageTransform, PdfDocument, PdfDocumentReference, Px,
 };
-use rayon::prelude::ParallelExtend;
+use rayon::prelude::{ParallelExtend, IntoParallelIterator, ParallelIterator};
 
 use std::{
     convert::TryInto,
@@ -61,9 +61,7 @@ impl ImageToPdf {
     pub fn create_pdf(self, out: &mut BufWriter<impl Write>) -> Result<(), Error> {
         let dpi = self.dpi;
         let doc = PdfDocument::empty(self.document_title);
-        for image in self.images.into_iter() {
-            add_page(image, &doc, dpi);
-        }
+        self.images.into_iter().for_each(|image| add_page(image, &doc, dpi));
         doc.save(out)
     }
 }
