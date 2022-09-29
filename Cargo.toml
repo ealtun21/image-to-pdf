@@ -17,3 +17,9 @@ printpdf = { version = "0.3", features = ["embedded_images"] }
 
 [dev-dependencies]
 version-sync = "0.9"
+
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1
+
