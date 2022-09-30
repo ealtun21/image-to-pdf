@@ -2,7 +2,7 @@ use printpdf::{
     image_crate::{DynamicImage, GenericImageView},
     Error, Image, ImageTransform, PdfDocument, PdfDocumentReference, Px,
 };
-use rayon::prelude::{ParallelExtend, IntoParallelIterator, ParallelIterator};
+use rayon::prelude::ParallelExtend;
 
 use std::{
     convert::TryInto,
@@ -15,12 +15,22 @@ pub struct ImageToPdf {
     document_title: String,
 }
 
-impl ImageToPdf {
-    pub fn new() -> ImageToPdf {
-        ImageToPdf {
+impl Default for ImageToPdf {
+    fn default() -> Self {
+        Self {
             images: Vec::new(),
             dpi: 300.0,
-            document_title: String::new(),
+            document_title: "".to_string(),
+        }
+    }
+}
+
+impl ImageToPdf {
+    pub fn new(images: Vec<DynamicImage>, dpi: f64, document_title: String) -> ImageToPdf {
+        ImageToPdf {
+            images,
+            dpi,
+            document_title,
         }
     }
 
@@ -61,8 +71,37 @@ impl ImageToPdf {
     pub fn create_pdf(self, out: &mut BufWriter<impl Write>) -> Result<(), Error> {
         let dpi = self.dpi;
         let doc = PdfDocument::empty(self.document_title);
-        self.images.into_iter().for_each(|image| add_page(image, &doc, dpi));
+        self.images
+            .into_iter()
+            .for_each(|image| add_page(image, &doc, dpi));
         doc.save(out)
+    }
+}
+
+#[cfg(feature = "progress")]
+pub mod webp {
+    use indicatif::ProgressBar;
+    use std::io::{BufWriter, Write};
+
+    use printpdf::{Error, PdfDocument};
+
+    use crate::{add_page, ImageToPdf};
+
+    impl ImageToPdf {
+        pub fn create_with_progress_pdf(
+            self,
+            out: &mut BufWriter<impl Write>,
+        ) -> Result<(), Error> {
+            let pb = ProgressBar::new(self.images.len() as u64);
+
+            let dpi = self.dpi;
+            let doc = PdfDocument::empty(self.document_title);
+            self.images.into_iter().for_each(|image| {
+                add_page(image, &doc, dpi);
+                pb.inc(1);
+            });
+            doc.save(out)
+        }
     }
 }
 
@@ -79,5 +118,5 @@ fn add_page(image: DynamicImage, doc: &PdfDocumentReference, dpi: f64) {
     let image = Image::from_dynamic_image(&image);
     let current_layer = doc.get_page(page).get_layer(layer);
 
-    image.add_to_layer(current_layer.clone(), ImageTransform::default());
+    image.add_to_layer(current_layer, ImageTransform::default());
 }
