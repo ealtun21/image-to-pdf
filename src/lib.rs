@@ -80,7 +80,7 @@ impl ImageToPdf {
 
 #[cfg(feature = "progress")]
 pub mod webp {
-    use indicatif::ProgressBar;
+    use indicatif::{ProgressBar, ProgressStyle, MultiProgress};
     use std::io::{BufWriter, Write};
 
     use printpdf::{Error, PdfDocument};
@@ -88,11 +88,32 @@ pub mod webp {
     use crate::{add_page, ImageToPdf};
 
     impl ImageToPdf {
-        pub fn create_with_progress_pdf(
+        pub fn create_with_progress_rest_pdf(
             self,
             out: &mut BufWriter<impl Write>,
+            sty: ProgressStyle,
+            m: MultiProgress,
+            old_pb: ProgressBar
         ) -> Result<(), Error> {
-            let pb = ProgressBar::new(self.images.len() as u64);
+            let pb = ProgressBar::new(self.images.len() as u64).with_style(sty);
+            m.insert_after(&old_pb, pb.clone());
+
+            let dpi = self.dpi;
+            let doc = PdfDocument::empty(self.document_title);
+            self.images.into_iter().for_each(|image| {
+                add_page(image, &doc, dpi);
+                pb.inc(1);
+            });
+            doc.save(out)
+        }
+        pub fn create_with_progress_first_pdf(
+            self,
+            out: &mut BufWriter<impl Write>,
+            sty: ProgressStyle,
+            m: MultiProgress,
+        ) -> Result<(), Error> {
+            let pb = ProgressBar::new(self.images.len() as u64).with_style(sty);
+            m.add(pb.clone());
 
             let dpi = self.dpi;
             let doc = PdfDocument::empty(self.document_title);

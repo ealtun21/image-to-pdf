@@ -1,6 +1,6 @@
 [package]
 name = "image_to_pdf"
-version = "0.4.0"
+version = "0.5.0"
 edition = "2021"
 description = "Create PDFs from images"
 readme = "README.md"
@@ -14,7 +14,7 @@ categories = ["multimedia::images"]
 img-parts = "0.2"
 printpdf = { version = "0.5.3", features = ["embedded_images"] }
 rayon = "1.5.3"
-indicatif = { version = "0.17.1", optional = true }
+indicatif = { version = "0.17.1", optional = true}
 
 [features]
 progress = ["dep:indicatif"]
