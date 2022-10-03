@@ -68,22 +68,31 @@ impl ImageToPdf {
     }
 
     /// Writes the PDF output to `out`.
-    pub fn create_pdf(self, out: &mut BufWriter<impl Write>) -> Result<(), Error> {
+    pub fn create_pdf(self) -> PdfDocumentReference {
         let dpi = self.dpi;
         let doc = PdfDocument::empty(self.document_title);
         self.images
             .into_iter()
             .for_each(|image| add_page(image, &doc, dpi));
+        doc
+    }
+
+    /// Writes the PDF output to `out`.
+    pub fn save_pdf(
+        self,
+        doc: PdfDocumentReference,
+        out: &mut BufWriter<impl Write>,
+    ) -> Result<(), Error> {
         doc.save(out)
     }
 }
 
 #[cfg(feature = "progress")]
 pub mod webp {
-    use indicatif::{ProgressBar, ProgressStyle, MultiProgress};
+    use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
     use std::io::{BufWriter, Write};
 
-    use printpdf::{Error, PdfDocument};
+    use printpdf::{Error, PdfDocument, PdfDocumentReference};
 
     use crate::{add_page, ImageToPdf};
 
@@ -93,7 +102,7 @@ pub mod webp {
             out: &mut BufWriter<impl Write>,
             sty: ProgressStyle,
             m: MultiProgress,
-            old_pb: ProgressBar
+            old_pb: ProgressBar,
         ) -> Result<(), Error> {
             let pb = ProgressBar::new(self.images.len() as u64).with_style(sty);
             m.insert_after(&old_pb, pb.clone());
@@ -108,10 +117,9 @@ pub mod webp {
         }
         pub fn create_with_progress_first_pdf(
             self,
-            out: &mut BufWriter<impl Write>,
             sty: ProgressStyle,
             m: MultiProgress,
-        ) -> Result<(), Error> {
+        ) -> PdfDocumentReference {
             let pb = ProgressBar::new(self.images.len() as u64).with_style(sty);
             m.add(pb.clone());
 
@@ -121,8 +129,8 @@ pub mod webp {
                 pb.inc(1);
                 add_page(image, &doc, dpi);
             });
-            m.clear();
-            doc.save(out)
+            m.clear().unwrap();
+            doc
         }
     }
 }
