@@ -118,9 +118,10 @@ pub mod webp {
             let dpi = self.dpi;
             let doc = PdfDocument::empty(self.document_title);
             self.images.into_iter().for_each(|image| {
-                add_page(image, &doc, dpi);
                 pb.inc(1);
+                add_page(image, &doc, dpi);
             });
+            m.clear();
             doc.save(out)
         }
     }
