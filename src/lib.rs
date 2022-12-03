@@ -68,7 +68,7 @@ impl ImageToPdf {
     }
 
     /// Writes the PDF output to `out`.
-    pub fn create_pdf(self) -> PdfDocumentReference {
+    pub fn create(self) -> PdfDocumentReference {
         let dpi = self.dpi;
         let doc = PdfDocument::empty(self.document_title);
         self.images
@@ -78,7 +78,7 @@ impl ImageToPdf {
     }
 
     /// Writes the PDF output to `out`.
-    pub fn save_pdf(
+    pub fn save(
         self,
         doc: PdfDocumentReference,
         out: &mut BufWriter<impl Write>,
@@ -97,25 +97,7 @@ pub mod webp {
     use crate::{add_page, ImageToPdf};
 
     impl ImageToPdf {
-        pub fn create_with_progress_rest_pdf(
-            self,
-            out: &mut BufWriter<impl Write>,
-            sty: ProgressStyle,
-            m: MultiProgress,
-            old_pb: ProgressBar,
-        ) -> Result<(), Error> {
-            let pb = ProgressBar::new(self.images.len() as u64).with_style(sty);
-            m.insert_after(&old_pb, pb.clone());
-
-            let dpi = self.dpi;
-            let doc = PdfDocument::empty(self.document_title);
-            self.images.into_iter().for_each(|image| {
-                add_page(image, &doc, dpi);
-                pb.inc(1);
-            });
-            doc.save(out)
-        }
-        pub fn create_with_progress_first_pdf(
+        pub fn create_with_progress(
             self,
             sty: ProgressStyle,
             m: MultiProgress,

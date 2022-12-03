@@ -1,6 +1,6 @@
 [package]
 name = "image_to_pdf"
-version = "0.6.0"
+version = "0.7.0"
 edition = "2021"
 description = "Create PDFs from images"
 readme = "README.md"
@@ -11,7 +11,7 @@ categories = ["multimedia::images"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-img-parts = "0.2"
+img-parts = "0.3"
 printpdf = { version = "0.5.3", features = ["embedded_images"] }
 rayon = "1.5.3"
 indicatif = { version = "0.17.1", optional = true}
